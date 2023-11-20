@@ -55,7 +55,6 @@ export default function ImageUpload(){
             <div>
                 <div>
                 <input type="file" onChange ={(e)=>request.file = e.target.files[0]} />
-                <button type="sumbit" onClick={uploadImage}>upload</button>
                 </div>
                 <br/>
                 <div>
@@ -74,7 +73,7 @@ export default function ImageUpload(){
                 </div>    
             </div>
             <button onClick={uploadImage} >Upload data</button>
-            <a href={downloadFile.url} download={"image.png"} onClick={handleDownload}>Download</a>
+            <button><a href={downloadFile.url} download={"image.png"} onClick={handleDownload}>Download image</a></button>
         </div>
     )
 }
