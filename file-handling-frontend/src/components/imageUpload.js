@@ -1,13 +1,14 @@
-import {useState} from "react"
 import axios from "axios";
+import {useEffect, useState} from "react";
 
 
 export default function ImageUpload(){
 
     // const [request,setRequest] = useState(null);
-    const downloadFile = {
-        url: ""
-    }
+    const [url,setUrl] = useState("");
+    const [imageData,setImageData] = useState([]);
+
+    
 
     const request = {
         file: null,
@@ -37,22 +38,48 @@ export default function ImageUpload(){
 
     }
 
-    const handleDownload = async () => {
-
-        const response = await axios.get("http://localhost:8090/getImage/2",{responseType: "blob"});
+    const handleDownload = async (e) => {
+        console.log("value of anchor tag ",e)
+        const imageNumber = e;
+        try{
+        const response = await axios.get(`http://localhost:8090/getImage/${imageNumber}`,{responseType: "blob"});
         console.log("response",response);
-        const blob =  response.data;
-        downloadFile.url = URL.createObjectURL(blob);
-        URL.revokeObjectURL(downloadFile.url);
+        const blob = await response.data;
+        console.log("blob",blob);
+        const updatedUrl = URL.createObjectURL(new Blob([blob]));
+        console.log("updated url ",updatedUrl);
+        setUrl(updatedUrl)
+        console.log("updated the url using set method",url)
+        URL.revokeObjectURL(updatedUrl);
+        }
+        catch(error){
+            console.error(error);
+        }
+        
 
     }
+
+    useEffect( ()=>{
+
+        async function getImagesMetaData (){
+            const response = (await axios.get(`http://localhost:8090/getImages`));
+            const responseData = response.data.images;
+            console.log("response data "+responseData);
+            setImageData([...responseData]);
+        }
+        console.log("Fetching images meta data");
+        getImagesMetaData();
+
+        return () => {setImageData([])};
+
+    },[url]);
 
     return (
         <div>
             <header>
                 <h2>Hi Welcome to image upload section</h2>
             </header>
-            <div>
+            <section>
                 <div>
                 <input type="file" onChange ={(e)=>request.file = e.target.files[0]} />
                 </div>
@@ -71,9 +98,20 @@ export default function ImageUpload(){
                 <span>Enter your phone number: </span>
                 <input type="text"  onChange={(e)=>request.number = e.target.value}/> 
                 </div>    
-            </div>
+            </section>
             <button onClick={uploadImage} >Upload data</button>
-            <button><a href={downloadFile.url} download={"image.png"} onClick={handleDownload}>Download image</a></button>
+
+            <img src = {url} alt="cant find dude"></img>
+            
+            {imageData.length>0 && imageData.map((item,index)=>{
+
+                return(
+                    <div key ={index}>
+                        <span>{item.imageName}</span>
+                        <button><a href={url} download={`${item.imageName}.png`} rel="noreferrer" target="_blank" onClick={()=>{handleDownload(item.id)}}>Download image</a></button>
+                    </div>
+                );
+            })}
         </div>
     )
 }
