@@ -43,7 +43,7 @@ export default function ImageUpload(){
         }
         const anchorUrl = await genericFileDownloader(`getImage/${e}`,`${imageName}.png`)
         setUrl(anchorUrl);
-        
+        saveAs(anchorUrl,`${imageName}.png`);
 
     }
 
