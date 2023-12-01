@@ -1,34 +1,33 @@
 import axios from "axios";
 import {useEffect, useState} from "react";
 import {saveAs} from "file-saver";
-
+import genericFileDownloader from "./genericFileDownloader";
+import "../css/ImageUpload.css";
 
 export default function ImageUpload(){
 
-    const [url,setUrl] = useState(null);
+    const [url,setUrl] = useState("");
     const [imageData,setImageData] = useState([]);
 
     const request = {
         file: null,
         name: "",
-        address: "",
-        number:  ""
-    }
+        description: ""
+    } ;
 
     const uploadImage = async ()=>{
 
         const formData = new FormData();
         formData.append("image",request.file);
         formData.append("name",request.name);
-        formData.append("address",request.address);
-        formData.append("number",request.number);
+        formData.append("description",request.description);
 
-        // for (const [key, value] of formData.entries()) {
-        //     console.log(`${key}: ${value}`);
-        //   }
-
+        
         try{
         const response = await axios.post("http://localhost:8090/uploadImage",formData);
+        request.file = null;
+        request.name = "";
+        request.description = "";
         console.log(response);
         }catch(error){
             console.error(error);
@@ -37,24 +36,13 @@ export default function ImageUpload(){
     }
 
     const handleDownload = async (e,imageName) => {
-        if(url !== null){
+        
+        if(url !== null ){
             URL.revokeObjectURL(url);
             console.log("url revoked!!");
         }
-        console.log("value of anchor tag ",e)
-        const imageNumber = e;
-        try{
-        const response = await axios.get(`http://localhost:8090/getImage/${imageNumber}`,{responseType: "blob"});
-        const blob = await response.data;
-        console.log("response ",blob);
-        const urlReference = URL.createObjectURL(new Blob([blob]));
-        console.log("url created")
-        setUrl(urlReference);
-        saveAs(urlReference,`${imageName}.png`);
-        }
-        catch(error){
-            console.error(error);
-        }
+        const anchorUrl = await genericFileDownloader(`getImage/${e}`,`${imageName}.png`)
+        setUrl(anchorUrl);
         
 
     }
@@ -84,33 +72,47 @@ export default function ImageUpload(){
                 </div>
                 <br/>
                 <div>
-                <span>Enter your name: </span>
+                <span>Enter the name of cricketer: </span>
                 <input type="text"  onChange={(e)=>request.name = e.target.value}/> 
                 </div>
                 <br/>
                 <div>
-                <span>Enter your address: </span>
-                <input type="text"  onChange={(e)=>request.address = e.target.value}/> 
-                </div>
-                <br/>
-                <div>
-                <span>Enter your phone number: </span>
-                <input type="text"  onChange={(e)=>request.number = e.target.value}/> 
-                </div>    
+                <span>Enter the description: </span>
+                <input type="text"  onChange={(e)=>request.description = e.target.value}/> 
+                </div>  
             </section>
+            <br></br>
             <button onClick={uploadImage} >Upload data</button>
             <div>
-            <img src = {url} alt="Unable to load image" style={{height:"200px",width:"400px"}}></img>
+            <br></br>
+            {url.length > 1 && <img src = {url} alt="Unable to load image" style={{height:"200px",width:"400px"}}></img>}
+            <br></br>
+            <br></br>
             </div>
+            <div className="tableContainer"> 
+            <table className="table">
+            <thead>
+                <tr>
+                <th>Sl.No</th>
+                <th>Name of cricketer</th>
+                <th>Image link</th>
+                </tr> 
+            </thead>
+            <tbody>
             {imageData.length>0 && imageData.map((item,index)=>{
 
-                return(
-                    <div key ={index}>
-                        <span>{item.imageName}</span>
-                        <button onClick={()=>{handleDownload(item.id,item.imageName)}}>Download {item.imageName}</button>
-                    </div>
-                );
+             return(
+                 <tr key ={index}>
+                <td>{index+1}</td>
+                <td>{item.imageName}</td>
+                <td><a href={url} onClick={(e)=>{e.preventDefault();handleDownload(item.id,item.imageName)}}>Download</a></td>
+                </tr>
+                   );
             })}
+            </tbody>
+            </table>
+            </div>
+            
         </div>
     )
 }

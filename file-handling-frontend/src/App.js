@@ -7,7 +7,7 @@ function App() {
     <div className="App">
       <h1>Welcome to Reactjs</h1>
       <ImageUpload/>
-      <ExcelDownload></ExcelDownload>
+      <ExcelDownload/>
     </div>
   );
 }
