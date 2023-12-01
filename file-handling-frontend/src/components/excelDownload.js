@@ -44,7 +44,6 @@ import {saveAs} from "file-saver";
         <>
         <h1>Hi Welcome to excel download functionality</h1>
         <iframe src={url} width={"100%"} height={"500px"} />
-        {url}
         <section>
             <button onClick={downloadExcel}>Download excel</button>
             <button onClick={downloadPdf}>Download pdf</button>
